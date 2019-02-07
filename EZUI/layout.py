@@ -3,12 +3,14 @@ from pyglet.gl import *
 
 class Vector():
 
-    def __init__(self, x, y, name, color=None):
+    def __init__(self, x, y, name=None, color=None):
         self.x = x
         self.y = y
         self.name = name
         if color == None:
-            self.color = [x*0.01, y*0.01, (x+y)*0.005]
+            self.color = [x*0.01, y*0.01, (x*y)/10000, 0.5]
+            print(self.name)
+            print(self.color)
         else:
             self.color = color
 
@@ -37,12 +39,12 @@ class VectorQuad():
         self.parent = parent
 
     def draw(self, window):
-        glColor3f(self.color[0], self.color[1], self.color[2])
-        glVertex2f(self.x0*0.01*window.width, self.y0*0.01*window.height)
+        glColor4f(self.color[0], self.color[1], self.color[2], self.color[3])
         glVertex2f(self.x0*0.01*window.width, self.y1*0.01*window.height)
-        glVertex2f(self.x1*0.01*window.width, self.y1*0.01*window.height)
+        glVertex2f(self.x0*0.01*window.width, self.y0*0.01*window.height)
         glVertex2f(self.x1*0.01*window.width, self.y0*0.01*window.height)
-        
+        glVertex2f(self.x1*0.01*window.width, self.y1*0.01*window.height)
+
         # if using tree structure (not necessary per sé):
         if self.children != None:
             for child in self.children:
@@ -70,7 +72,7 @@ class Surface():
         '''
 
 
-def layout(lijstPunten, x0=0, y0=0, i=0):
+def layout(lijstPunten, x0=0, y0=100, i=0, subx=None):
     vectorQuadArr = []
     childrenArr = []
     first = True
@@ -87,7 +89,14 @@ def layout(lijstPunten, x0=0, y0=0, i=0):
 
         else:
             if v.x <= newQuad.x1:
-                templayout = layout(lijstPunten, newQuad.x0, newQuad.y1, i)
+                tempv = findVectorLeft(vectorQuadArr, v)
+                if tempv == None:
+                    templayout = layout(lijstPunten, 0,
+                                        newQuad.y1, i, newQuad.x1)
+                else:
+                    templayout = layout(
+                        lijstPunten, tempv.x1, newQuad.y1, i, newQuad.x1)
+
                 tempArr = templayout[0]
 
                 for quad in tempArr:
@@ -97,12 +106,24 @@ def layout(lijstPunten, x0=0, y0=0, i=0):
                 newQuad.giveChildren(templayout[1])
 
             else:
-                newQuad = VectorQuad(newQuad.x1, newQuad.y0, v)
-                vectorQuadArr.append(newQuad)
-                childrenArr.append(newQuad)
-                i += 1
+                if subx != None and v.x > subx:
+                    return [vectorQuadArr, childrenArr]
+                else:
+                    newQuad = VectorQuad(newQuad.x1, newQuad.y0, v)
+                    vectorQuadArr.append(newQuad)
+                    childrenArr.append(newQuad)
+                    i += 1
 
     return [vectorQuadArr, childrenArr]
+
+
+def findVectorLeft(arrayList, newVector):
+    tempVector = None
+    for vector in arrayList:
+        if vector.y1 < newVector.y:
+            if tempVector == None or tempVector.x1 < vector.x1:
+                tempVector = vector
+    return tempVector
 
 
 def stringToVectorArray(string):
@@ -112,11 +133,14 @@ def stringToVectorArray(string):
         coordarr = vectorString.split(",")
         x = int(coordarr[0])
         y = int(coordarr[1])
-        name = coordarr[2]
-        if(len(coordarr) == 4):
-            color = coordarr[3]
-            vector = Vector(x, y, name, color)
+        if(len(coordarr) > 2):
+            name = coordarr[2]
+            if(len(coordarr) == 4):
+                color = coordarr[3]
+                vector = Vector(x, y, name, color)
+            else:
+                vector = Vector(x, y, name)
         else:
-            vector = Vector(x, y, name)
+            vector = Vector(x, y)
         vectorArray.append(vector)
     return vectorArray
