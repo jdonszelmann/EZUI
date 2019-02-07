@@ -8,7 +8,7 @@ class Vector():
         self.y = y
         self.name = name
         if color == None:
-            self.color = [x*2.56, y*2.56, (x+y)*1.28]
+            self.color = [x*0.01, y*0.01, (x+y)*0.005]
         else:
             self.color = color
 
@@ -36,28 +36,14 @@ class VectorQuad():
     def giveParent(self, parent):
         self.parent = parent
 
-    def normalize(self, window):
-        self.x0 = self.x0*0.01*window.width
-        self.x1 = self.x1*0.01*window.width
-        self.y0 = self.y0*0.01*window.height
-        self.y1 = self.y1*0.01*window.height
-
-    def denormalize(self, window):
-        self.x0 = self.x0/window.width*100
-        self.x1 = self.x1/window.width*100
-        self.y0 = self.y0/window.width*100
-        self.y1 = self.y1/window.width*100
-
     def draw(self, window):
-        self.normalize(window)
         glColor3f(self.color[0], self.color[1], self.color[2])
         glBegin(GL_QUADS)
-        glVertex2f(self.x0, self.y0)
-        glVertex2f(self.x0, self.y1)
-        glVertex2f(self.x1, self.y1)
-        glVertex2f(self.x1, self.y0)
+        glVertex2f(self.x0*0.01*window.width, self.y0*0.01*window.width)
+        glVertex2f(self.x0*0.01*window.width, self.y1*0.01*window.width)
+        glVertex2f(self.x1*0.01*window.width, self.y1*0.01*window.width)
+        glVertex2f(self.x1*0.01*window.width, self.y0*0.01*window.width)
         glEnd()
-        self.denormalize(window)
 
         # if using tree structure (not necessary per sé):
         if self.children != None:
