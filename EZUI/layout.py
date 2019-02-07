@@ -1,4 +1,5 @@
 from pyglet.gl import *
+import random
 
 
 class Vector():
@@ -8,9 +9,7 @@ class Vector():
         self.y = y
         self.name = name
         if color == None:
-            self.color = [x*0.01, y*0.01, (x*y)/10000, 0.5]
-            print(self.name)
-            print(self.color)
+            self.color = [self.x*0.01, self.y*0.01, random.uniform(0, 1), 1]
         else:
             self.color = color
 
@@ -117,10 +116,14 @@ def layout(lijstPunten, x0=0, y0=100, i=0, subx=None):
     return [vectorQuadArr, childrenArr]
 
 
+def findVectorLO(arrayList, newVector):
+    pass
+
+
 def findVectorLeft(arrayList, newVector):
     tempVector = None
     for vector in arrayList:
-        if vector.y1 < newVector.y:
+        if vector.y1 <= newVector.y:
             if tempVector == None or tempVector.x1 < vector.x1:
                 tempVector = vector
     return tempVector
@@ -128,19 +131,30 @@ def findVectorLeft(arrayList, newVector):
 
 def stringToVectorArray(string):
     vectorArray = []
-    tempVectorArray = string.split(".")
+    tempVectorArray = string.split(">,")
     for vectorString in tempVectorArray:
-        coordarr = vectorString.split(",")
-        x = int(coordarr[0])
-        y = int(coordarr[1])
-        if(len(coordarr) > 2):
-            name = coordarr[2]
-            if(len(coordarr) == 4):
-                color = coordarr[3]
-                vector = Vector(x, y, name, color)
+        vectorString = vectorString.replace("<", "")
+        vectorString = vectorString.replace(">", "")
+        vectorString = vectorString.split(":")
+
+        name = vectorString[0]
+        x = int(vectorString[1])
+        y = int(vectorString[2])
+        print(vectorString)
+
+        if len(vectorString) >= 6:
+            r = int(vectorString[3])
+            g = int(vectorString[4])
+            b = int(vectorString[5])
+            if len(vectorString) == 7:
+                q = int(vectorString[6])
             else:
-                vector = Vector(x, y, name)
+                q = 1
+            color = [r, g, b, q]
         else:
-            vector = Vector(x, y)
+            color = None
+
+        vector = Vector(x, y, name, color)
+
         vectorArray.append(vector)
     return vectorArray
