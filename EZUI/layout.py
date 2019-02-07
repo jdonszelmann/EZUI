@@ -11,11 +11,12 @@ class Vector():
 
 class VectorQuad():
 
-    def __init__(self, x0, y0, x1, y1):
+    def __init__(self, x0, y0, x1, y1, name):
         self.x0 = x0
         self.x1 = x1
         self.y0 = y0
         self.y1 = y1
+        self.name = name
 
     def giveChildren(self, children):
         self.children = children
@@ -64,7 +65,7 @@ def layout(lijstPunten, x0, y0, i):
         v = lijstPunten[i]
 
         if i == 0:
-            newQuad = VectorQuad(x0, y0, v.x, v.y)
+            newQuad = VectorQuad(x0, y0, v.x, v.y, v.name)
             vectorQuadArr.append(newQuad)
             childrenArr.append(newQuad)
             i += 1
@@ -81,9 +82,22 @@ def layout(lijstPunten, x0, y0, i):
                 newQuad.giveChildren(templayout[1])
 
             else:
-                newQuad = VectorQuad(newQuad.x1, newQuad.y0, v.x, v.y)
+                newQuad = VectorQuad(newQuad.x1, newQuad.y0, v.x, v.y, v.name)
                 vectorQuadArr.append(newQuad)
                 childrenArr.append(newQuad)
                 i += 1
 
     return [vectorQuadArr, childrenArr]
+
+
+def stringToVectorArray(string):
+    vectorArray = []
+    tempVectorArray = string.split(".")
+    for vectorString in tempVectorArray:
+        coordarr = vectorString.split(",")
+        x = int(coordarr[0])
+        y = int(coordarr[1])
+        name = coordarr[2]
+        vector = Vector(x, y, name)
+        vectorArray.append(vector)
+    return vectorArray
