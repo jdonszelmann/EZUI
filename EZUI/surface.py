@@ -62,6 +62,19 @@ class Surface(Drawable):
         self._absolutex = None
         self._absolutey = None
 
+    @classmethod
+    def getSurfaceWithName(cls, name):
+        assert name in cls.names, "could not find surface with name {}".format(
+            name)
+        return cls.names[name]
+
+    @classmethod
+    def getRoot(cls, node):
+        if node.parent == None:
+            return node
+        else:
+            return cls.getRoot(node.parent)
+
     @staticmethod
     def overlaps(A, B):
         def inrange(value, min, max):
@@ -107,6 +120,9 @@ class Surface(Drawable):
 
     def draw(self):
         if self.parent == None:
+            from .main import Window
+            assert isinstance(
+                self, Window), "can only draw surface tree with a window as root"
             assert hasattr(self, "width"), "could not find width attribute"
             assert hasattr(self, "height"), "could not find height attribute"
             self._absolutewidth = int(self.width * self.size[0]/100)

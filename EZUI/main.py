@@ -1,8 +1,10 @@
+from .menu import Menu
 import pyglet
 from pyglet.gl import *
 import json
 import os
 from . import surface
+from .drawable import Drawable
 
 path = os.path.dirname(os.path.abspath(__file__))
 
@@ -35,6 +37,20 @@ class Window(pyglet.window.Window, surface.Surface):
 
         pyglet.clock.schedule_interval(self.update, 1 / 60)
 
+        self.eventhandlers = []
+
+    def menu(self, *args):
+        return Menu(self, *args)
+
+    def registerEventhandler(self, obj):
+        self.eventhandlers.append(obj)
+
+    def deregisterEventhandler(self, obj):
+        self.eventhandlers.remove(obj)
+
+    def isregisteredEventhandler(self, obj):
+        return obj in self.eventhandlers
+
     @classmethod
     def run(cls):
         pyglet.app.run()
@@ -43,7 +59,29 @@ class Window(pyglet.window.Window, surface.Surface):
         """
         called n times per second to update all UI elements
         """
-        pass
+        for i in self.eventhandlers:
+            if hasattr(i, "update"):
+                i.update()
+
+    def on_mouse_motion(self, x, y, dx, dy):
+        for i in self.eventhandlers:
+            if hasattr(i, "mouse_motion"):
+                i.mouse_motion(x, self.height-y, dx, -dy)
+
+    def on_mouse_press(self, x, y, button, modifiers):
+        for i in self.eventhandlers:
+            if hasattr(i, "mouse_press"):
+                i.mouse_press(x, self.height-y, button, modifiers)
+
+    def on_mouse_release(self, x, y, button, modifiers):
+        for i in self.eventhandlers:
+            if hasattr(i, "mouse_release"):
+                i.mouse_release(x, self.height-y, button, modifiers)
+
+    def on_mouse_drag(self, x, y, dx, dy, buttons, modifiers):
+        for i in self.eventhandlers:
+            if hasattr(i, "mouse_drag"):
+                i.mouse_drag(x, self.height-y, dx, -dy, buttons, modifiers)
 
     def on_draw(self):
         """
@@ -54,7 +92,12 @@ class Window(pyglet.window.Window, surface.Surface):
         glPushMatrix()
         # translate to make the origin top left
         glTranslatef(0, self.height, 0)
+
         glScalef(1, -1, 1)
 
         self.draw()
+
+        for i in self.eventhandlers:
+            i.draw()
+
         glPopMatrix()

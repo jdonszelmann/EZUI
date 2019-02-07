@@ -15,4 +15,10 @@ window.addChildren(
         EZUI.Surface("rightrootbottom", (0, 70), (100, 30)),
     ])
 )
+
+window.menu(
+    "testmenu",
+    # startingsurface="leftrootbottomright"
+)
+
 EZUI.Window.run()
