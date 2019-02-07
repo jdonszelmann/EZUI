@@ -40,13 +40,8 @@ class Window(pyglet.window.Window):
         draws all content to screen
         """
         glClear(GL_COLOR_BUFFER_BIT)
-        label = pyglet.text.Label(
-            'Hello, world',
-            font_name='Times New Roman',
-            font_size=36,
-            x=self.width//2, y=self.height//2,
-            anchor_x='center', anchor_y='center',
-            color=(0, 0, 0, 255)
-        )
+        if self.surface != None:
+            self.surface.draw(self)
 
-        label.draw()
+    def giveSurface(self, surface):
+        self.surface = surface

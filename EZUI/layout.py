@@ -3,20 +3,30 @@ from pyglet.gl import *
 
 class Vector():
 
-    def __init__(self, x, y, name):
+    def __init__(self, x, y, name, color=None):
         self.x = x
         self.y = y
         self.name = name
+        if color == None:
+            self.color = [x*2.56, y*2.56, (x+y)*1.28]
+        else:
+            self.color = color
+
+    def __repr__(self):
+        return "<Vector: Name = {}, x = {}, y = {}>\n".format(self.name, self.x, self.y)
 
 
 class VectorQuad():
 
-    def __init__(self, x0, y0, x1, y1, name):
+    def __init__(self, x0, y0, vector):
         self.x0 = x0
-        self.x1 = x1
+        self.x1 = vector.x
         self.y0 = y0
-        self.y1 = y1
-        self.name = name
+        self.y1 = vector.y
+        self.name = vector.name
+        self.color = vector.color
+        self.children = None
+        self.parent = None
 
     def giveChildren(self, children):
         self.children = children
@@ -26,18 +36,33 @@ class VectorQuad():
     def giveParent(self, parent):
         self.parent = parent
 
-    def draw(self):
-        glBegin(GL_Quad)
+    def normalize(self, window):
+        self.x0 = self.x0*0.01*window.width
+        self.x1 = self.x1*0.01*window.width
+        self.y0 = self.y0*0.01*window.height
+        self.y1 = self.y1*0.01*window.height
+
+    def denormalize(self, window):
+        self.x0 = self.x0/window.width*100
+        self.x1 = self.x1/window.width*100
+        self.y0 = self.y0/window.width*100
+        self.y1 = self.y1/window.width*100
+
+    def draw(self, window):
+        self.normalize(window)
+        glColor3f(self.color[0], self.color[1], self.color[2])
+        glBegin(GL_QUADS)
         glVertex2f(self.x0, self.y0)
         glVertex2f(self.x0, self.y1)
         glVertex2f(self.x1, self.y1)
         glVertex2f(self.x1, self.y0)
         glEnd()
+        self.denormalize(window)
 
         # if using tree structure (not necessary per sé):
         if self.children != None:
             for child in self.children:
-                child.draw()
+                child.draw(window)
 
 
 class Surface():
@@ -46,26 +71,30 @@ class Surface():
         self.vectorQuadArr = layoutArray[0]
         self.childrenArr = layoutArray[1]
 
-    def draw(self):
+    def draw(self, window):
         # either:
         for child in self.childrenArr:
-            child.draw()
-            # using the tree structure referenced in line 35
+            child.draw(window)
+        # using the tree structure referenced in line 35
         # or:
+        '''
         for vectorQuad in self.vectorQuadArr:
             vectorQuad.draw()
             # without the tree structure
+        '''
 
 
-def layout(lijstPunten, x0, y0, i):
+def layout(lijstPunten, x0=0, y0=0, i=0):
     vectorQuadArr = []
     childrenArr = []
+    first = True
 
     while i < len(lijstPunten):
         v = lijstPunten[i]
 
-        if i == 0:
-            newQuad = VectorQuad(x0, y0, v.x, v.y, v.name)
+        if first == True:
+            first = False
+            newQuad = VectorQuad(x0, y0, v)
             vectorQuadArr.append(newQuad)
             childrenArr.append(newQuad)
             i += 1
@@ -82,7 +111,7 @@ def layout(lijstPunten, x0, y0, i):
                 newQuad.giveChildren(templayout[1])
 
             else:
-                newQuad = VectorQuad(newQuad.x1, newQuad.y0, v.x, v.y, v.name)
+                newQuad = VectorQuad(newQuad.x1, newQuad.y0, v)
                 vectorQuadArr.append(newQuad)
                 childrenArr.append(newQuad)
                 i += 1
@@ -98,6 +127,10 @@ def stringToVectorArray(string):
         x = int(coordarr[0])
         y = int(coordarr[1])
         name = coordarr[2]
-        vector = Vector(x, y, name)
+        if(len(coordarr) == 4):
+            color = coordarr[3]
+            vector = Vector(x, y, name, color)
+        else:
+            vector = Vector(x, y, name)
         vectorArray.append(vector)
     return vectorArray
