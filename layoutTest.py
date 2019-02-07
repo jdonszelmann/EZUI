@@ -1,6 +1,6 @@
 import EZUI
 
-string = "100,50,een.50,100,twee.100,100,drie"
+string = "100,50,een.100,40,vier.50,0,twee.100,0,drie"
 vectors = EZUI.stringToVectorArray(string)
 
 print(vectors)

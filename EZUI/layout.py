@@ -38,13 +38,11 @@ class VectorQuad():
 
     def draw(self, window):
         glColor3f(self.color[0], self.color[1], self.color[2])
-        glBegin(GL_QUADS)
-        glVertex2f(self.x0*0.01*window.width, self.y0*0.01*window.width)
-        glVertex2f(self.x0*0.01*window.width, self.y1*0.01*window.width)
-        glVertex2f(self.x1*0.01*window.width, self.y1*0.01*window.width)
-        glVertex2f(self.x1*0.01*window.width, self.y0*0.01*window.width)
-        glEnd()
-
+        glVertex2f(self.x0*0.01*window.width, self.y0*0.01*window.height)
+        glVertex2f(self.x0*0.01*window.width, self.y1*0.01*window.height)
+        glVertex2f(self.x1*0.01*window.width, self.y1*0.01*window.height)
+        glVertex2f(self.x1*0.01*window.width, self.y0*0.01*window.height)
+        
         # if using tree structure (not necessary per sé):
         if self.children != None:
             for child in self.children:
@@ -59,8 +57,10 @@ class Surface():
 
     def draw(self, window):
         # either:
+        glBegin(GL_QUADS)
         for child in self.childrenArr:
             child.draw(window)
+        glEnd()
         # using the tree structure referenced in line 35
         # or:
         '''
