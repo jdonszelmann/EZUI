@@ -34,6 +34,27 @@ class VectorQuad():
         for child in children:
             child.giveParent(self)
 
+    def validate(self):
+        if self.x0 >= self.x1 or self.y0 <= self.y1:
+            return False
+        if self.x0 < 0 or self.x1 > 100 or self.y0 > 100 or self.y0 < 0:
+            return False
+
+        i = 0
+        if self.children != None:
+            while i < len(self.children):
+                c = self.children[i]
+                if not c.validate():
+                    return False
+                if c.y0 > self.y1 or c.x1 > self.x1:
+                    return False
+                if i > 1:
+                    cv = self.children[i-1]
+                    if c.x0 != cv.x1 or c.y0 != cv.y0:
+                        return False
+                i += 1
+        return True
+
     def giveParent(self, parent):
         self.parent = parent
 
@@ -50,16 +71,29 @@ class VectorQuad():
                 child.draw(window)
 
 
+'''
+    def validate(self):
+        if x0>=x1 or y0<=y1:
+            return False
+        if self.children!=None:
+            for child in self.children:
+                if(not child.validate):
+                    return False
+                if child.y0<self.y1 or child.x1>self.x1:
+                    return True
+'''
+
+
 class Surface():
 
     def __init__(self, layoutArray):
         self.vectorQuadArr = layoutArray[0]
-        self.childrenArr = layoutArray[1]
+        self.children = layoutArray[1]
 
     def draw(self, window):
         # either:
         glBegin(GL_QUADS)
-        for child in self.childrenArr:
+        for child in self.children:
             child.draw(window)
         glEnd()
         # using the tree structure referenced in line 35
@@ -69,6 +103,20 @@ class Surface():
             vectorQuad.draw()
             # without the tree structure
         '''
+
+    def validate(self):
+        i = 0
+        if self.children != None:
+            while i < len(self.children):
+                c = self.children[i]
+                if not c.validate():
+                    return False
+                if i > 1:
+                    cv = self.children[i-1]
+                    if c.x0 != cv.x1 or c.y0 != cv.y0:
+                        return False
+                i += 1
+        return True
 
 
 def layout(lijstPunten, x0=0, y0=100, i=0, subx=None):
@@ -140,14 +188,13 @@ def stringToVectorArray(string):
         name = vectorString[0]
         x = int(vectorString[1])
         y = int(vectorString[2])
-        print(vectorString)
 
         if len(vectorString) >= 6:
-            r = int(vectorString[3])
-            g = int(vectorString[4])
-            b = int(vectorString[5])
+            r = float(vectorString[3])
+            g = float(vectorString[4])
+            b = float(vectorString[5])
             if len(vectorString) == 7:
-                q = int(vectorString[6])
+                q = float(vectorString[6])
             else:
                 q = 1
             color = [r, g, b, q]
