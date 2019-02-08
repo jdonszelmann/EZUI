@@ -83,11 +83,24 @@ class Window(pyglet.window.Window, surface.Surface):
             if hasattr(i, "mouse_drag"):
                 i.mouse_drag(x, self.height-y, dx, -dy, buttons, modifiers)
 
+    def on_resize(self, width, height):
+        glViewport(0, 0, width, height)
+        glMatrixMode(gl.GL_PROJECTION)
+        glLoadIdentity()
+        glOrtho(0, width, 0, height, -1, 1)
+        glMatrixMode(gl.GL_MODELVIEW)
+
+        for i in self.eventhandlers:
+            if hasattr(i, "resize"):
+                i.resize(width, height)
+
     def on_draw(self):
         """
         draws all content to screen
         """
         glClear(GL_COLOR_BUFFER_BIT)
+
+        glLoadIdentity()
 
         glPushMatrix()
         # translate to make the origin top left

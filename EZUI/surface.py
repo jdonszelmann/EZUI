@@ -1,6 +1,7 @@
 from collections.abc import Iterable
 from .drawable import Drawable
 from pyglet.gl import *
+import math
 
 
 class Surface(Drawable):
@@ -114,6 +115,18 @@ class Surface(Drawable):
         child.parent = self
         self.children.append(child)
 
+    def findLeafNodes(self):
+        def findleafnodes(root, leafnodes=None):
+            if leafnodes == None:
+                leafnodes = []
+            if len(root.children) == 0:
+                leafnodes.append(root)
+            for i in root.children:
+                leafnodes += findleafnodes(i)
+            return leafnodes
+
+        return findleafnodes(self)
+
     def addChildren(self, *children):
         for i in children:
             self.addChild(i)
@@ -125,10 +138,10 @@ class Surface(Drawable):
                 self, Window), "can only draw surface tree with a window as root"
             assert hasattr(self, "width"), "could not find width attribute"
             assert hasattr(self, "height"), "could not find height attribute"
-            self._absolutewidth = int(self.width * self.size[0]/100)
-            self._absoluteheight = int(self.height * self.size[1]/100)
-            self._absolutex = 0 + int(0 + self.width * self.position[0]/100)
-            self._absolutey = 0 + int(0 + self.height * self.position[1]/100)
+            self._absolutewidth = math.ceil(self.width * self.size[0]/100)
+            self._absoluteheight = math.ceil(self.height * self.size[1]/100)
+            self._absolutex = math.ceil(0 + self.width * self.position[0]/100)
+            self._absolutey = math.ceil(0 + self.height * self.position[1]/100)
         else:
 
             assert self.parent._absolutewidth != None
@@ -136,17 +149,17 @@ class Surface(Drawable):
             assert self.parent._absolutex != None
             assert self.parent._absolutey != None
 
-            self._absolutewidth = int(
+            self._absolutewidth = math.ceil(
                 self.parent._absolutewidth * self.size[0] / 100
             )
-            self._absoluteheight = int(
+            self._absoluteheight = math.ceil(
                 self.parent._absoluteheight * self.size[1] / 100
             )
-            self._absolutex = int(
+            self._absolutex = math.ceil(
                 self.parent._absolutex +
                 self.parent._absolutewidth * self.position[0] / 100
             )
-            self._absolutey = int(
+            self._absolutey = math.ceil(
                 self.parent._absolutey +
                 self.parent._absoluteheight * self.position[1] / 100
             )
@@ -157,26 +170,28 @@ class Surface(Drawable):
         # print(self._absolutex)
         # print(self._absolutey)
 
-        glColor4f(51/255, self._absoluteheight/480, self._absolutewidth /
-                  640+self._absolutex/640, 0.8)
-        glBegin(GL_QUADS)
-        glVertex2f(
-            self._absolutex,
-            self._absolutey
-        )
-        glVertex2f(
-            self._absolutex + self._absolutewidth,
-            self._absolutey
-        )
-        glVertex2f(
-            self._absolutex + self._absolutewidth,
-            self._absolutey + self._absoluteheight
-        )
-        glVertex2f(
-            self._absolutex,
-            self._absolutey + self._absoluteheight
-        )
-        glEnd()
+        # only draw root nodes in the surface tree
+        if len(self.children) == 0:
+            glColor4f(51/255, self._absoluteheight/480, self._absolutewidth /
+                      640+self._absolutex/640, 0.8)
+            glBegin(GL_QUADS)
+            glVertex2f(
+                self._absolutex,
+                self._absolutey
+            )
+            glVertex2f(
+                self._absolutex + self._absolutewidth,
+                self._absolutey
+            )
+            glVertex2f(
+                self._absolutex + self._absolutewidth,
+                self._absolutey + self._absoluteheight
+            )
+            glVertex2f(
+                self._absolutex,
+                self._absolutey + self._absoluteheight
+            )
+            glEnd()
 
         for i in self.children:
             i.draw()
