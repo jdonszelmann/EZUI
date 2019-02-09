@@ -205,3 +205,21 @@ def stringToVectorArray(string):
 
         vectorArray.append(vector)
     return vectorArray
+
+# two temporary methods to test with:
+
+
+def kleuren(v):
+    if v.children != None:
+        for child in v.children:
+            childcolor(child)
+            if child.children != None:
+                kleuren(child)
+
+
+# temp test
+def childcolor(v):
+    if v.parent != None:
+        rand = random.uniform(0, 0.2)
+        for i in range(3):
+            v.color[i] = v.parent.color[i]*0.9 + rand
